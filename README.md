@@ -1,2 +1,2 @@
 # LinkDownloader
-Helper project of upcoming project
+Helper project of a upcoming project

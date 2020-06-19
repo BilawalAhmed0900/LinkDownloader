@@ -1,0 +1,24 @@
+{
+  "name": "linkdownloader",
+  "version": "0.0.1",
+  "description": "Allows remeable downloading from a link with GUI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BilawalAhmed0900/LinkDownloader.git"
+  },
+  "author": "BilawalAhmed0900",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/BilawalAhmed0900/LinkDownloader/issues"
+  },
+  "homepage": "https://github.com/BilawalAhmed0900/LinkDownloader#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^9.0.4",
+    "electron-packager": "^14.2.1"
+  }
+}
