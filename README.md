@@ -2,4 +2,4 @@
 Helper project of a upcoming project
 
 ## Theme
-Used Bootswatch theme (https://bootswatch.com/cosmo/)[Cosmo].
+Used Bootswatch theme [Cosmo](https://bootswatch.com/cosmo/).
