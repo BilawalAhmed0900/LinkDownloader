@@ -11,7 +11,7 @@ const url = require("url");
   Constants
 */
 const WINDOW_WIDTH = 650;
-const WINDOW_HEIGHT = 180;
+const WINDOW_HEIGHT = 205;
 const WINDOW_HTML_FILE = 'mainWindow.html';
 
 const LINK_ARGUMENT_STRING = "link"
