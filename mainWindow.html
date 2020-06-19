@@ -3,10 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
+  <link rel="stylesheet" href="bootstrap.css">
+  <link rel="stylesheet" href="style.css">
   <title>Downloading</title>
 </head>
 <body>
-  
+<div style="width: 100%;">
+  <span class="left_p top_p">Url:</span>
+  <span class="left_p top_p fixed_left overflow_handled" id="setUrlTo"></span>
+</div>
+<br>
+<div style="width: 100%;">
+  <span class="left_p top_p">Size:</span>
+  <span class="left_p top_p fixed_left overflow_handled" id="setSizeTo"></span>
+</div>
+<br>
+<div style="width: 100%;">
+  <span class="left_p top_p">Resumable:</span>
+  <span class="left_p top_p fixed_left overflow_handled" id="setResumableTo"></span>
+</div>
+<br>
+<div style="width: 100%;">
+  <span class="left_p top_p">Speed:</span>
+  <span class="left_p top_p fixed_left overflow_handled" id="setSpeedTo">0B/s</span>
+</div>
+<br>
+<div style="width: 100%;">
+  <progress class="progress_bar" id="progressBar" value="0" max="1000"></progress>
+</div>
+<div style="width: 100%;">
+<button class="right_flushed" id="pauseButton">Cancel</button>
+<button class="right_flushed" id="cancelButton">Pause</button>
+</div>
 </body>
 <script src="mainWindow.js"></script>
 </html>

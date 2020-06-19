@@ -1,0 +1,51 @@
+.left_p
+{
+  float: left;
+  position: absolute;
+  padding-left: 1%;
+  width: 10%;
+}
+
+.top_p
+{
+  padding-top: 1%;
+}
+
+.fixed_left
+{
+  left: 15%;
+  width: 85%;
+}
+
+.overflow_handled
+{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress_bar
+{
+  width: 98%;
+  height: 2rem;
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-top: 1%;
+}
+
+.right_flushed
+{
+  float: right;
+}
+
+button
+{
+  margin-left: 1%;
+  width: 14%;
+  margin-right: 1%;
+}
+
+body
+{
+  overflow: hidden;
+}
