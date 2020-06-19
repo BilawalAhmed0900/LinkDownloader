@@ -16,7 +16,9 @@
     "url": "https://github.com/BilawalAhmed0900/LinkDownloader/issues"
   },
   "homepage": "https://github.com/BilawalAhmed0900/LinkDownloader#readme",
-  "dependencies": {},
+  "dependencies": {
+    "minimist": "^1.2.5"
+  },
   "devDependencies": {
     "electron": "^9.0.4",
     "electron-packager": "^14.2.1"
