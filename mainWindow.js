@@ -247,7 +247,7 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
         reject(`HTTP status code: ${statusCode}`);
       }
 
-      let downloaded = startByte;
+      let downloaded = 0;
       let startTime = process.hrtime();
       res.on("data", chunk =>
       {
