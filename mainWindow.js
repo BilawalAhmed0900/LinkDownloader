@@ -6,6 +6,7 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const crypto = require("crypto");
+const {execSync} = require("child_process");
 
 /*
   These are all information about the file to download from the Url send from ipcMain
@@ -24,6 +25,17 @@ let mainHttpRequest = null;
   the client is destroyed
 */
 let isPaused = false;
+
+function getCommandLine() 
+{
+  switch (process.platform) 
+  { 
+     case 'darwin' : return 'open';
+     case 'win32' : return 'start \"\"';
+     case 'win64' : return 'start \"\"';
+     default : return 'xdg-open';
+  }
+}
 
 function download()
 {
@@ -53,6 +65,24 @@ function download()
       stream.close();
       readStream.close();
       fs.unlinkSync(tempFilePath);
+
+      const resultOfQuestion = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(),
+      {
+        title: "Downloading completed...",
+        type: "question",
+        message: `Downloading of\n${actualFilePath}\nhas completed, What do you want to do?`,
+        buttons: ["Open File", "Close Window"]
+      });
+
+      if (resultOfQuestion === 0)
+      try
+      {
+        execSync(`${getCommandLine()} \"${actualFilePath}\"`);
+      }
+      catch (_error)
+      {
+        
+      }
       remote.getCurrentWindow().close();
     }
   }).catch((error) =>
