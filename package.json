@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/BilawalAhmed0900/LinkDownloader#readme",
   "dependencies": {
+    "follow-redirects": "^1.12.1",
     "minimist": "^1.2.5",
     "ws": "^7.3.0"
   },
