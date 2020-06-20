@@ -4,7 +4,10 @@
   "description": "Minimalist GUI downloader with Chrome and Firefox extension",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --prune=true --out=release-builds",
+    "package-win": "electron-packager . linkdownloader --overwrite --asar=true --platform=win32 --arch=x64 --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"linkdownloader\"",
+    "package-linux": "electron-packager . linkdownloader --overwrite --asar=true --platform=linux --arch=x64 --prune=true --out=release-builds"
   },
   "repository": {
     "type": "git",
@@ -16,9 +19,15 @@
     "url": "https://github.com/BilawalAhmed0900/LinkDownloader/issues"
   },
   "homepage": "https://github.com/BilawalAhmed0900/LinkDownloader#readme",
-  "dependencies": {},
+  "dependencies": {
+    "ws": "^7.3.0"
+  },
   "devDependencies": {
     "electron": "^9.0.4",
     "electron-packager": "^14.2.1"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
   }
 }
