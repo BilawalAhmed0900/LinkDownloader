@@ -1,6 +1,6 @@
 "use strict";
 const electron = require("electron");
-const {app, ipcRenderer, remote, dialog} = electron;
+const {ipcRenderer, remote} = electron;
 const path = require("path");
 const http = require("http");
 const https = require("https");
@@ -247,26 +247,33 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
         reject(`HTTP status code: ${statusCode}`);
       }
 
+      let currentIteration = 0;
       let downloaded = 0;
+      let previousDownloaded = 0;
       let startTime = process.hrtime();
       res.on("data", chunk =>
       {
-        const elapsedTime = process.hrtime(startTime);
-        const previousDownloaded = downloaded;
         downloaded += chunk.length;
-
-        document.getElementById("setSpeedTo").innerHTML = 
-          `${normalizeSize((downloaded - previousDownloaded) / (elapsedTime[0] + (elapsedTime[1] / 1e9)))}/s`;
-
-        document.getElementById("setDownloadedTo").innerHTML = normalizeSize(downloaded);
-        if (length !== -1)
+        ++currentIteration;
+        if (currentIteration === 4)
         {
-          document.getElementById("progressBar").value = (downloaded / length) * 
-            document.getElementById("progressBar").max;
-        }
-        file.write(chunk);
+          const elapsedTime = process.hrtime(startTime);
+          document.getElementById("setDownloadedTo").innerHTML = normalizeSize(downloaded);
+          if (length !== -1)
+          {
+            document.getElementById("progressBar").value = (downloaded / length) * 
+              document.getElementById("progressBar").max;
+          }
 
-        startTime = process.hrtime();
+          document.getElementById("setSpeedTo").innerHTML = 
+            `${normalizeSize((downloaded - previousDownloaded) / (elapsedTime[0] + (elapsedTime[1] / 1e9)))}/s`;
+
+          previousDownloaded = downloaded;
+          startTime = process.hrtime();
+          currentIteration = 0;
+        }
+        
+        file.write(chunk);
       });
       
       res.on("end", () =>

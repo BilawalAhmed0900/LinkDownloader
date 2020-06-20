@@ -1,10 +1,7 @@
 "use strict";
 const electron = require("electron");
-const {app, BrowserWindow, Menu, dialog, ipcMain} = electron;
-const ARGS = require("minimist")(process.argv.slice(2));
+const {app, BrowserWindow, Menu} = electron;
 const path = require("path");
-const http = require("follow-redirects").http;
-const https = require("follow-redirects").https;
 const url = require("url");
 const WebSocket = require("ws");
 
