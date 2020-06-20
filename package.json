@@ -1,7 +1,7 @@
 {
   "name": "linkdownloader",
   "version": "0.1.0",
-  "description": "Allows remeable downloading from a link with GUI",
+  "description": "Allows resumeable downloading from a link with GUI",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -17,10 +17,15 @@
   },
   "homepage": "https://github.com/BilawalAhmed0900/LinkDownloader#readme",
   "dependencies": {
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.5",
+    "ws": "^7.3.0"
   },
   "devDependencies": {
     "electron": "^9.0.4",
     "electron-packager": "^14.2.1"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
   }
 }

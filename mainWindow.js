@@ -4,7 +4,7 @@ const {app, ipcRenderer} = electron;
 const http = require("http");
 const https = require("https");
 
-function normalizeSize(sizeInBytes)
+function normalizeSize(sizeInBytes, numberOfDecimalDigits = 4)
 {
   const suffixArray = ["B", "KiB", "MiB", "GiB", "TiB"]
   let suffixArrayIndex = 0
@@ -24,7 +24,7 @@ function normalizeSize(sizeInBytes)
     }
   }
 
-  return `${result.toFixed(4)} ${suffixArray[suffixArrayIndex]}`;
+  return `${result.toFixed(numberOfDecimalDigits)} ${suffixArray[suffixArrayIndex]}`;
 }
 
 let filenameString;
@@ -32,6 +32,7 @@ let UrlString;
 let CookiesJSON;
 let isResumable;
 let length;
+let downloaded;
 ipcRenderer.on("downloading-data", (_event, message) =>
 {
   const messageJSON = JSON.parse(message);
@@ -40,6 +41,7 @@ ipcRenderer.on("downloading-data", (_event, message) =>
     !("length" in messageJSON))
   {
     ipcRenderer.send("close-mainwindow", true);
+	return;
   }
   messageJSON["cookies"] = JSON.parse(messageJSON["cookies"]);
 
@@ -54,6 +56,9 @@ ipcRenderer.on("downloading-data", (_event, message) =>
 
   document.getElementById("setSizeTo").innerHTML = (length === -1) ? "(Unknown)" : normalizeSize(length);
   document.getElementById("setResumableTo").innerHTML = (isResumable) ? "Yes" : "No";
+
+  downloaded = 0;
+  document.getElementById("setDownloadedTo").innerHTML = normalizeSize(downloaded);
 
   document.title = `Downloading ${filenameString}...`;
 });

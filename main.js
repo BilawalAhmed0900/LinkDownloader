@@ -6,19 +6,18 @@ const path = require("path");
 const http = require("http");
 const https = require("https");
 const url = require("url");
+const WebSocket = require("ws");
 
 /*
   Constants
 */
 const WINDOW_WIDTH = 650;
-const WINDOW_HEIGHT = 205;
+const WINDOW_HEIGHT = 225;
 const WINDOW_HTML_FILE = 'mainWindow.html';
 
-const LINK_ARGUMENT_STRING = "link"
-const LINK_ARGUMENT = `--${LINK_ARGUMENT_STRING}=`;
-const COOKIE_ARGUMENT_STRING = "cookies"
-const COOKIE_ARGUMENT = `--${COOKIE_ARGUMENT_STRING}=`;
-let mainWindow;
+const DEFAULT_HOST = "localhost";
+const DEFAULT_PORT = 49152;
+const DEFAULT_BACKLOG = 16;
 
 /*
   Takes in
@@ -26,7 +25,7 @@ let mainWindow;
     CookiesJSON as JSON
 
   Returns
-    Promise that may resolve to JSON containing reponse of HEAD request
+    Promise that may resolve to JSON containing response of HEAD request
 */
 function getHead(UrlString, CookiesJSON)
 {
@@ -91,107 +90,111 @@ function isResumable(HEADRequestJSON)
   return false;
 }
 
-/*
-  Constants
-*/
-const CookiesJSON = 
-  (ARGS[COOKIE_ARGUMENT_STRING] !== undefined) 
-  ? JSON.parse(ARGS[COOKIE_ARGUMENT_STRING]) 
-  : {};
-const UrlString = ARGS[LINK_ARGUMENT_STRING];
-if (UrlString === undefined)
+app.on("window-all-closed", (e) =>
 {
-  console.log(`(npm start --|electron .|package executable) ${LINK_ARGUMENT}Url [${COOKIE_ARGUMENT}CookieAsJSON]`);
-  process.exit();
-}
+  e.preventDefault();
+});
 
-app.on("ready", async() =>
+app.on("ready", () =>
 {
-  let responseHeader;
-  let fileName;
-  try 
-  {
-    responseHeader = await getHead(UrlString, CookiesJSON);
-    fileName = getFileName(UrlString, responseHeader);
-  } 
-  catch (error) 
-  {
-    dialog.showMessageBoxSync(null, 
+  const wss = new WebSocket.Server(
     {
-      type: "error",
-      title: "Error",
-      message: String(error)
+      host: DEFAULT_HOST,
+      port: DEFAULT_PORT,
+      backlog: DEFAULT_BACKLOG,
+      perMessageDeflate: false
     });
-    app.quit();
-  }
-  
-  const saveFileName = dialog.showSaveDialogSync(null, 
+
+  wss.on("connection", function connection(ws)
+  {
+    console.log("Connection establised...");
+    ws.on("message", async function incoming(data)
     {
-      defaultPath: path.join(app.getPath("downloads"), fileName),
-      properties: ["createDirectory", "dontAddToRecent"]
-    });
-  
-  if (saveFileName === undefined)
-  {
-    app.quit();
-  }
+      const dataJSON = JSON.parse(data);
+      dataJSON["cookies"] = JSON.parse(dataJSON["cookies"]);
 
-  mainWindow = new BrowserWindow(
-  {
-    width: WINDOW_WIDTH,
-    height: WINDOW_HEIGHT,
-    resizable: false,
-    show: false,
-    webPreferences: 
-    {
-      nodeIntegration: true
-    }
-  });
-
-  mainWindow.loadURL(url.format(
-  {
-    pathname: path.join(__dirname, WINDOW_HTML_FILE),
-    protocol: "file:",
-    slashes: true
-  }));
-
-  mainWindow.on("close", () =>
-  {
-    app.quit();
-  });
-
-  mainWindow.on("ready-to-show", () =>
-  {
-    mainWindow.show();
-  });
-
-  // mainWindow.toggleDevTools();
-  Menu.setApplicationMenu(null);
-
-  /*
-    After the service gets ready, send necessary data for the electron window for
-    downloading process
-  */
-  mainWindow.webContents.on("did-finish-load", () =>
-  {
-    ipcMain.on("close-mainwindow", (_event, message) =>
-    {
-      if (message === true)
+      let headRequest;
+      try
       {
-        mainWindow.close();
+        headRequest = await getHead(dataJSON["finalUrl"], dataJSON["cookies"]);
+        dataJSON["filename"] = getFileName(dataJSON["finalUrl"], headRequest);
       }
-    });
+      catch(error)
+      {
+        dialog.showMessageBoxSync(null, 
+          {
+            type: "error",
+            title: "Error",
+            message: String(error)
+          });
+        return;
+      }
+
+      // console.log(dataJSON);
+      // console.log(headRequest);
+
+      const saveFileName = dialog.showSaveDialogSync(null, 
+        {
+          defaultPath: path.join(app.getPath("downloads"), dataJSON["filename"]),
+          properties: ["createDirectory", "dontAddToRecent"]
+        });
+
+      if (saveFileName === undefined)
+      {
+        return;
+      }
+      
+      const mainWindow = new BrowserWindow(
+        {
+          width: WINDOW_WIDTH,
+          height: WINDOW_HEIGHT,
+          resizable: false,
+          show: false,
+          webPreferences: 
+          {
+            nodeIntegration: true
+          }
+        });
+      
+      mainWindow.loadURL(url.format(
+      {
+        pathname: path.join(__dirname, WINDOW_HTML_FILE),
+        protocol: "file:",
+        slashes: true
+      }));
     
-    mainWindow.webContents.send("downloading-data", JSON.stringify(
-    {
-      filename: fileName,
-      url: UrlString,
-      length: 
-        responseHeader["content-length"] !== undefined 
-        ? parseInt(responseHeader["content-length"], 10)
-        : -1,
-      cookies: JSON.stringify(CookiesJSON),
-      is_resumable: isResumable(responseHeader)
-    }));
+      mainWindow.on("ready-to-show", () =>
+      {
+        mainWindow.show();
+      });
+
+      Menu.setApplicationMenu(null);
+      /*
+        After the service gets ready, send necessary data for the electron window for
+        downloading process
+      */
+      mainWindow.webContents.on("did-finish-load", () =>
+      {
+        ipcMain.on("close-mainwindow", (_event, message) =>
+        {
+          if (message === true)
+          {
+            mainWindow.close();
+          }
+        });
+        
+        mainWindow.webContents.send("downloading-data", JSON.stringify(
+        {
+          filename: dataJSON["filename"],
+          url: dataJSON["finalUrl"],
+          length: 
+            headRequest["content-length"] !== undefined 
+            ? parseInt(headRequest["content-length"], 10)
+            : -1,
+          cookies: JSON.stringify(dataJSON["cookies"]),
+          is_resumable: isResumable(headRequest)
+        }));
+      });
+    });
   });
 });
