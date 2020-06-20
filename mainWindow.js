@@ -241,6 +241,7 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       }
       else
       {
+        isPaused = true;
         res.resume();
         mainHttpRequest.destroy();
         reject(`HTTP status code: ${statusCode}`);
