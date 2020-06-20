@@ -1,6 +1,6 @@
 {
   "name": "linkdownloader",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Allows remeable downloading from a link with GUI",
   "main": "main.js",
   "scripts": {
