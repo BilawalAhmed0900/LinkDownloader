@@ -62,7 +62,7 @@ app.on("ready", () =>
         mainWindow.on("ready-to-show", () =>
         {
           mainWindow.show();
-          mainWindow.toggleDevTools();
+          //mainWindow.toggleDevTools();
         });
 
         Menu.setApplicationMenu(null);
