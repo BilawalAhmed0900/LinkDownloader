@@ -7,6 +7,7 @@ const https = require("https");
 const fs = require("fs");
 const crypto = require("crypto");
 const {execSync} = require("child_process");
+const querystring = require("querystring")
 
 /*
   These are all information about the file to download from the Url send from ipcMain
@@ -39,9 +40,14 @@ function getCommandLine()
 
 function download()
 {
-  downloadFromURL(UrlString, CookieString, UserAgentString).then(async([tempFilePath, actualFilePath]) =>
+  downloadFromURL(UrlString, CookieString, UserAgentString).then(async([tempFilePath, actualFilePath, headers]) =>
   {
-    if (isPaused === false)
+    if (headers !== undefined)
+    {
+      UrlString = headers["location"];
+      download();
+    }
+    else if (isPaused === false)
     {
       const {size} = fs.statSync(tempFilePath);
 
@@ -214,6 +220,11 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       */
       if (filenameString === null)
       {
+        const lastSlashIndex = UrlString.lastIndexOf("/");
+        const questionMarkIndex = UrlString.indexOf("?");
+        //console.log(lastSlashIndex);
+        //console.log(questionMarkIndex);
+        //console.log(headers["content-disposition"]);
         if ("content-disposition" in headers)
         {
           const filenameRegex = /filename=\"(.*?)\"/;
@@ -224,14 +235,21 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
           }
           else
           {
-            filenameString = UrlString.substr(UrlString.lastIndexOf("/") + 1);
+            filenameString = UrlString.substr(lastSlashIndex + 1, 
+              (questionMarkIndex > lastSlashIndex)
+              ? questionMarkIndex - lastSlashIndex - 1
+              : UrlString.length - lastSlashIndex);
           }
         }
         else
         {
-          filenameString = UrlString.substr(UrlString.lastIndexOf("/") + 1);
-        }
-  
+          filenameString = UrlString.substr(lastSlashIndex + 1, 
+            (questionMarkIndex > lastSlashIndex)
+            ? questionMarkIndex - lastSlashIndex - 1
+            : UrlString.length - lastSlashIndex);
+		    }
+        filenameString = querystring.unescape(filenameString);
+
         const toDownloadTo = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(),
         {
           defaultPath: path.join(remote.app.getPath("downloads"), filenameString),
@@ -249,7 +267,7 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       }
       document.title = `Downloading ${filenameString}...`;
 
-      let file = null;
+      let file = undefined;
       /*
         If the result is 206, we append to previous created file, else we create new one
       */
@@ -268,6 +286,15 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
           {
             flags: "w"
           });
+      }
+      else if (statusCode >= 300 & statusCode < 400)
+      {
+        if ("location" in headers)
+        {
+          res.resume();
+          mainHttpRequest.destroy();
+          resolve([tempFileName, filenameString, headers]);
+        }
       }
       else
       {
@@ -308,8 +335,11 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       
       res.on("end", () =>
       {
-        file.close();
-        resolve([tempFileName, filenameString]);
+        if (file !== undefined)
+        {
+          file.close();
+          resolve([tempFileName, filenameString, undefined]);
+        }
       });
     })
     .on("error", (error) =>
