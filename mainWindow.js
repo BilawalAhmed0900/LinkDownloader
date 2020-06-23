@@ -220,8 +220,11 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       */
       if (filenameString === null)
       {
-        const lastSlashIndex = UrlString.lastIndexOf("/");
-        const questionMarkIndex = UrlString.indexOf("?");
+        const lastSlashRemovedUrlString = (UrlString.endsWith("/"))
+          ? UrlString.substr(0, UrlString.length - 1)
+          : UrlString;
+        const lastSlashIndex = lastSlashRemovedUrlString.lastIndexOf("/");
+        const questionMarkIndex = lastSlashRemovedUrlString.indexOf("?");
         //console.log(lastSlashIndex);
         //console.log(questionMarkIndex);
         //console.log(headers["content-disposition"]);
@@ -235,20 +238,25 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
           }
           else
           {
-            filenameString = UrlString.substr(lastSlashIndex + 1, 
+            filenameString = lastSlashRemovedUrlString.substr(lastSlashIndex + 1, 
               (questionMarkIndex > lastSlashIndex)
               ? questionMarkIndex - lastSlashIndex - 1
-              : UrlString.length - lastSlashIndex);
+              : lastSlashRemovedUrlString.length - lastSlashIndex);
           }
         }
         else
         {
-          filenameString = UrlString.substr(lastSlashIndex + 1, 
+          filenameString = lastSlashRemovedUrlString.substr(lastSlashIndex + 1, 
             (questionMarkIndex > lastSlashIndex)
             ? questionMarkIndex - lastSlashIndex - 1
-            : UrlString.length - lastSlashIndex);
+            : lastSlashRemovedUrlString.length - lastSlashIndex);
 		    }
         filenameString = querystring.unescape(filenameString);
+        if ("content-type" in headers && headers["content-type"].indexOf("html") > -1
+          && !filenameString.endsWith(".html"))
+        {
+          filenameString += ".html";
+        }
 
         const toDownloadTo = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(),
         {
