@@ -218,7 +218,7 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
         At first time, it is null, we will extract from content-disposition and ask user,
         next time, we will just use the previous one for occasions like pausing
       */
-      if (filenameString === null)
+      if (filenameString === null && (statusCode === 200 || statusCode === 206))
       {
         const lastSlashRemovedUrlString = (UrlString.endsWith("/"))
           ? UrlString.substr(0, UrlString.length - 1)
