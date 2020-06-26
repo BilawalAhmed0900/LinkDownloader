@@ -323,11 +323,16 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
         if (currentIteration === 4)
         {
           const elapsedTime = process.hrtime(startTime);
-          document.getElementById("setDownloadedTo").innerHTML = normalizeSize(downloaded);
           if (length !== -1)
           {
+            remote.getCurrentWindow().setProgressBar(downloaded / length);
+            document.getElementById("setDownloadedTo").innerHTML = `${normalizeSize(downloaded)} (${(downloaded / length * 100.0).toFixed(2)} %)`;
             document.getElementById("progressBar").value = (downloaded / length) * 
               document.getElementById("progressBar").max;
+          }
+          else
+          {
+            document.getElementById("setDownloadedTo").innerHTML = normalizeSize(downloaded);
           }
 
           document.getElementById("setSpeedTo").innerHTML = 
@@ -343,6 +348,7 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       
       res.on("end", () =>
       {
+        remote.getCurrentWindow(-1.0);
         if (file !== undefined)
         {
           file.close();
@@ -352,6 +358,7 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
     })
     .on("error", (error) =>
       {
+        remote.getCurrentWindow(-1.0);
         reject(error);
       });
   });
