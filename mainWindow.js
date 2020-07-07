@@ -59,7 +59,10 @@ function download()
       readStream.on("data", chunk =>
       {
         copied += chunk.length;
-        document.getElementById("progressBar").value = (copied / size) * document.getElementById("progressBar").max;
+        if (size > 0)
+        {
+          document.getElementById("progressBar").value = (copied / size) * document.getElementById("progressBar").max;
+        }
       });
 
       const stream = readStream.pipe(fs.createWriteStream(actualFilePath));
@@ -306,6 +309,10 @@ function downloadFromURL(UrlString, CookieString, UserAgentString)
       }
       else
       {
+        if (statusCode === 416)
+        {
+          fs.unlinkSync(tempFileName);
+        }
         isPaused = true;
         res.resume();
         mainHttpRequest.destroy();
