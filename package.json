@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/BilawalAhmed0900/LinkDownloader#readme",
   "dependencies": {
-    "ws": "^7.3.0"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "electron": "^9.0.4",
